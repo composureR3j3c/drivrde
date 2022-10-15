@@ -38,7 +38,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   late LocationPermission permission;
   double bottomPadding = 0;
   double rideDetailContainerHeight = 0;
-  double requestHeight =0;
+  double requestHeight = 0;
   double searchContainerHeight = 320;
 
   bool searchScreen = true;
@@ -48,7 +48,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   void initState() {
     // TODO: implement initState
     super.initState();
-    tabController =TabController(length: 4, vsync: this)
+    tabController = TabController(length: 4, vsync: this);
   }
 
 
@@ -57,4 +57,4 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     return Container();
   }
 
-
+}
