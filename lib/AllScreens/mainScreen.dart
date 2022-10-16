@@ -1,19 +1,15 @@
 import 'dart:async';
 
-import 'package:driveridee/AllScreens/searchScreen.dart';
+import 'package:driveridee/AllScreens/TabPages/EarningsTab.dart';
+import 'package:driveridee/AllScreens/TabPages/HomeTab.dart';
+import 'package:driveridee/AllScreens/TabPages/ProfileTab.dart';
+import 'package:driveridee/AllScreens/TabPages/RatingsTab.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:provider/provider.dart';
 
-import '../Helpers/assistantMethods.dart';
 import '../Models/directDetails.dart';
-import '../Provider/appdata.dart';
-import '../Widgets/Colorize.dart';
-import '../Widgets/Divider.dart';
-import '../Widgets/Drawer.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -23,8 +19,8 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
-
   late TabController tabController;
+  var selectedIndex = 0;
   Completer<GoogleMapController> _controller = Completer();
   late GoogleMapController newGoogleMapController;
   static final CameraPosition _kinit = CameraPosition(
@@ -51,10 +47,39 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     tabController = TabController(length: 4, vsync: this);
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      body: TabBarView(
+        physics: NeverScrollableScrollPhysics(),
+        controller: tabController,
+        children: [
+          HomeTab(),
+          EarnigsTab(),
+          RatingsTab(),
+          ProfileTab(),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.credit_card), label: "Account"),
+          BottomNavigationBarItem(icon: Icon(Icons.star), label: "Ratings"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Account"),
+        ],
+        unselectedItemColor: Colors.black54,
+        selectedItemColor: Colors.teal,
+        type: BottomNavigationBarType.fixed,
+        selectedFontSize: 12.0,
+        showUnselectedLabels: true,
+        onTap: onItemclicked,
+      ),
+    );
   }
 
+  void onItemclicked(int index) {
+    selectedIndex = index;
+    tabController.index = selectedIndex;
+  }
 }
