@@ -54,7 +54,7 @@ class _CarInfoState extends State<CarInfo> {
 
       DatabaseReference reference =
           FirebaseDatabase.instance.ref().child("drivers");
-      reference.child(userId)..child("Car_details").set(CarInfoMap);
+      reference.child(userId).child("Car_details").set(CarInfoMap);
 
       Fluttertoast.showToast(msg: "Car details has been registered.");
       Navigator.push(context, MaterialPageRoute(builder: (c) => MainScreen()));

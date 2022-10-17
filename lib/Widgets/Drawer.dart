@@ -1,5 +1,8 @@
+import 'package:driveridee/AllScreens/LoginScreen.dart';
+import 'package:driveridee/Globals/Global.dart';
+import 'package:driveridee/Helpers/sendMail.dart';
 import 'package:flutter/material.dart';
-import '../Helpers/sendMail.dart';
+
 class DrawerWidget extends StatelessWidget {
   const DrawerWidget({Key? key}) : super(key: key);
 
@@ -38,7 +41,7 @@ class DrawerWidget extends StatelessWidget {
               title: Text('About'),
               onTap: () {
                 // Navigator.pushReplacementNamed(
-                    // context, UserProductScreen.routeName);
+                // context, UserProductScreen.routeName);
               },
             ),
             Divider(),
@@ -48,6 +51,18 @@ class DrawerWidget extends StatelessWidget {
               onTap: () {
                 sendMail();
                 Navigator.pop(context);
+                // Provider.of<Auth>(context, listen: false).logout();
+              },
+            ),
+            Divider(),
+            ListTile(
+              leading: Icon(Icons.exit_to_app),
+              title: Text('Log Out'),
+              onTap: () {
+                fAuth.signOut();
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (c) => LoginScreen()));
+
                 // Provider.of<Auth>(context, listen: false).logout();
               },
             ),
