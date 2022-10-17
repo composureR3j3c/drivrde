@@ -4,7 +4,7 @@ import 'package:driveridee/AllScreens/TabPages/EarningsTab.dart';
 import 'package:driveridee/AllScreens/TabPages/HomeTab.dart';
 import 'package:driveridee/AllScreens/TabPages/ProfileTab.dart';
 import 'package:driveridee/AllScreens/TabPages/RatingsTab.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -21,25 +21,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   late TabController tabController;
   var selectedIndex = 0;
-  Completer<GoogleMapController> _controller = Completer();
-  late GoogleMapController newGoogleMapController;
-  static final CameraPosition _kinit = CameraPosition(
-      bearing: 192.8334901395799,
-      target: LatLng(9.005401, 38.763611),
-      tilt: 59.440717697143555,
-      zoom: 19.151926040649414);
-
-  late Position currentPosition;
-  var geoLocator = Geolocator();
-  late LocationPermission permission;
-  double bottomPadding = 0;
-  double rideDetailContainerHeight = 0;
-  double requestHeight = 0;
-  double searchContainerHeight = 320;
-
-  bool searchScreen = true;
-  late DirectDetails tripDirectDetails = DirectDetails();
-
+  
   @override
   void initState() {
     // TODO: implement initState
@@ -83,3 +65,22 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     tabController.index = selectedIndex;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 

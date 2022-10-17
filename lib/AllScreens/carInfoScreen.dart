@@ -168,6 +168,9 @@ class _CarInfoState extends State<CarInfo> {
                       ),
                     ),
                   ),
+                  SizedBox(
+                    height: 40.0,
+                  ),
                   ElevatedButton(
                     onPressed: () {
                       validateForm();
@@ -175,11 +178,20 @@ class _CarInfoState extends State<CarInfo> {
                     style: ElevatedButton.styleFrom(
                       primary: Colors.lightGreenAccent,
                     ),
-                    child: const Text(
-                      "Create Account",
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 18,
+                    child: Padding(
+                      padding: const EdgeInsets.all(17.0),
+                      child: Row(
+                        children: [
+                          const Text(
+                            "NEXT",
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 18,
+                            ),
+                          ),
+                          Icon(Icons.arrow_forward,
+                              color: Colors.white, size: 26.0),
+                        ],
                       ),
                     ),
                   ),
