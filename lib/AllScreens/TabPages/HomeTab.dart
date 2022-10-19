@@ -1,18 +1,16 @@
 import 'dart:async';
 
 import 'package:driveridee/Globals/Global.dart';
+import 'package:driveridee/Notifications/pushNotificationService.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class HomeTab extends StatelessWidget {
+class HomeTab extends StatefulWidget {
   HomeTab({Key? key}) : super(key: key);
-
-  Completer<GoogleMapController> _controller = Completer();
-  late GoogleMapController newGoogleMapController;
-
-  double bottomPadding = 0;
 
   static final CameraPosition _kinit = const CameraPosition(
       bearing: 192.8334901395799,
@@ -20,9 +18,35 @@ class HomeTab extends StatelessWidget {
       tilt: 59.440717697143555,
       zoom: 19.151926040649414);
 
+  @override
+  State<HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<HomeTab> {
+  Completer<GoogleMapController> _controller = Completer();
+
+  late GoogleMapController newGoogleMapController;
+
+  double bottomPadding = 0;
+
   late Position currentPosition;
 
   late LocationPermission permission;
+
+  late String driverStatusText = "Offline Now - Go Online";
+
+  late Color driverStatusColor = Colors.black;
+
+  bool isDriverAvailable = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    super.initState();
+    subscribeToNotif();
+  }
+
   void locatePosition() async {
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -55,13 +79,19 @@ class HomeTab extends StatelessWidget {
     }
   }
 
+  void subscribeToNotif() {
+    PushNotifServices pushNotifServices = PushNotifServices();
+    pushNotifServices.checkPermission();
+    // pushNotifServices.getToken();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         GoogleMap(
           padding: EdgeInsets.only(bottom: bottomPadding),
-          initialCameraPosition: _kinit,
+          initialCameraPosition: HomeTab._kinit,
           mapType: MapType.normal,
           myLocationButtonEnabled: true,
           myLocationEnabled: true,
@@ -92,17 +122,35 @@ class HomeTab extends StatelessWidget {
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    makeDriverOnline();
+                    if (isDriverAvailable != true) {
+                      makeDriverOnline();
+                      getLiveLocation();
+
+                      setState(() {
+                        driverStatusColor = Colors.green;
+                        driverStatusText = "Online Now";
+                        isDriverAvailable = true;
+                      });
+                      Fluttertoast.showToast(msg: "you are Online Now.");
+                    } else {
+                      setState(() {
+                        driverStatusColor = Colors.black;
+                        driverStatusText = "Offline Now - Go Online";
+                        isDriverAvailable = false;
+                      });
+                      Fluttertoast.showToast(msg: "you are Offline Now.");
+                      makeDriverOffnline();
+                    }
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.green,
+                    backgroundColor: driverStatusColor,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(17.0),
                     child: Row(
                       children: [
-                        const Text(
-                          "Online Now",
+                        Text(
+                          driverStatusText,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -123,10 +171,43 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  void makeDriverOnline() {
+  void makeDriverOnline() async {
+    rideReference = FirebaseDatabase.instance
+        .ref()
+        .child("drivers")
+        .child(currentFirebaseUser!.uid)
+        .child("newRide");
+
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    currentPosition = position;
+
     Geofire.initialize("availableDrivers");
     Geofire.setLocation(currentFirebaseUser!.uid, currentPosition.latitude,
         currentPosition.longitude);
-        
+
+    rideReference!.onValue.listen((event) {});
+  }
+
+  void makeDriverOffnline() {
+    Geofire.removeLocation(currentFirebaseUser!.uid);
+    rideReference!.onDisconnect();
+    rideReference!.remove();
+    rideReference = null;
+
+    Fluttertoast.showToast(msg: "you are Offline Now.");
+  }
+
+  void getLiveLocation() {
+    homePageStreamSubscription =
+        Geolocator.getPositionStream().listen((Position position) {
+      currentPosition = position;
+      if (isDriverAvailable == true) {
+        Geofire.setLocation(
+            currentFirebaseUser!.uid, position.latitude, position.longitude);
+      }
+      LatLng latLng = LatLng(position.latitude, position.longitude);
+      newGoogleMapController.animateCamera(CameraUpdate.newLatLng(latLng));
+    });
   }
 }
