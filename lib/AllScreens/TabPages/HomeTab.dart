@@ -44,7 +44,8 @@ class _HomeTabState extends State<HomeTab> {
     // TODO: implement initState
 
     super.initState();
-    subscribeToNotif();
+    readCurrentDriverInformation();
+    // subscribeToNotif();
   }
 
   void locatePosition() async {
@@ -79,11 +80,11 @@ class _HomeTabState extends State<HomeTab> {
     }
   }
 
-  void subscribeToNotif() {
-    PushNotifServices pushNotifServices = PushNotifServices();
-    pushNotifServices.checkPermission();
-    // pushNotifServices.getToken();
-  }
+  // void subscribeToNotif() {
+  //   PushNotifServices pushNotifServices = PushNotifServices();
+  //   pushNotifServices.checkPermission();
+  //   // pushNotifServices.getToken();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -169,6 +170,13 @@ class _HomeTabState extends State<HomeTab> {
         ),
       ],
     );
+  }
+
+  readCurrentDriverInformation() async {
+    currentFirebaseUser = fAuth.currentUser;
+    PushNotifServices pushNotificationSystem = PushNotifServices();
+    pushNotificationSystem.initializeFCM(context);
+    pushNotificationSystem.generateAndGetToken();
   }
 
   void makeDriverOnline() async {
