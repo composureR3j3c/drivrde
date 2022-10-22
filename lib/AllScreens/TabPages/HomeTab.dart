@@ -132,6 +132,7 @@ class _HomeTabState extends State<HomeTab> {
                       });
                       Fluttertoast.showToast(msg: "you are Online Now.");
                     } else {
+                      getLiveLocation();
                       setState(() {
                         driverStatusColor = Colors.black;
                         driverStatusText = "Offline Now - Go Online";
@@ -231,7 +232,7 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   void getLiveLocation() {
-    homePageStreamSubscription =
+    streamSubscriptionPosition =
         Geolocator.getPositionStream().listen((Position position) {
       driverCurrentPosition = position;
       if (isDriverAvailable == true) {

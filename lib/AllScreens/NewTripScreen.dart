@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:driveridee/Globals/Global.dart';
 import 'package:driveridee/Models/UserRideRequestInfo.dart';
+import 'package:driveridee/Widgets/ProgressDialog.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -31,6 +32,8 @@ class _NewTripScreenState extends State<NewTripScreen> {
   Position? onlineDriverCurrentPosition;
   String? buttonTitle = "Arrived";
   Color? buttonColor = Colors.green;
+  String rideRequestStatus = "accepted";
+  String durationFromOriginToDestination = "12 mins";
   Set<Marker> setOfMarkers = Set<Marker>();
 
   @override
@@ -50,6 +53,7 @@ class _NewTripScreenState extends State<NewTripScreen> {
             mapType: MapType.normal,
             myLocationEnabled: true,
             initialCameraPosition: _kGooglePlex,
+            markers: setOfMarkers,
             onMapCreated: (GoogleMapController controller) {
               _controllerGoogleMap.complete(controller);
               newTripGoogleMapController = controller;
@@ -86,7 +90,7 @@ class _NewTripScreenState extends State<NewTripScreen> {
                   children: [
                     //duration
                     Text(
-                      "18 mins",
+                      durationFromOriginToDestination,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -199,7 +203,61 @@ class _NewTripScreenState extends State<NewTripScreen> {
                     const SizedBox(height: 10.0),
 
                     ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        //[driver has arrived at user PickUp Location] - Arrived Button
+                        if (rideRequestStatus == "accepted") {
+                          rideRequestStatus = "arrived";
+
+                          FirebaseDatabase.instance
+                              .ref()
+                              .child("Ride_Request")
+                              .child(
+                                  widget.userRideRequestDetails!.rideRequestId!)
+                              .child("status")
+                              .set(rideRequestStatus);
+
+                          setState(() {
+                            buttonTitle = "Let's Go"; //start the trip
+                            buttonColor = Colors.lightGreen;
+                          });
+
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext c) => ProgressDialog(
+                              message: "Loading...",
+                            ),
+                          );
+
+                          // await drawPolyLineFromOriginToDestination(
+                          //     widget.userRideRequestDetails!.originLatLng!,
+                          //     widget.userRideRequestDetails!.destinationLatLng!
+                          // );
+
+                          Navigator.pop(context);
+                        }
+                        //[user has already sit in driver's car. Driver start trip now] - Lets Go Button
+                        else if (rideRequestStatus == "arrived") {
+                          rideRequestStatus = "ontrip";
+
+                          FirebaseDatabase.instance
+                              .ref()
+                              .child("Ride_Request")
+                              .child(
+                                  widget.userRideRequestDetails!.rideRequestId!)
+                              .child("status")
+                              .set(rideRequestStatus);
+
+                          setState(() {
+                            buttonTitle = "End Trip"; //end the trip
+                            buttonColor = Colors.redAccent;
+                          });
+                        }
+                        //[user/Driver reached to the dropOff Destination Location] - End Trip Button
+                        else if (rideRequestStatus == "ontrip") {
+                          endTripNow();
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         primary: buttonColor,
                       ),
@@ -225,6 +283,46 @@ class _NewTripScreenState extends State<NewTripScreen> {
         ],
       ),
     );
+  }
+
+  endTripNow() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => ProgressDialog(
+        message: "Please wait...",
+      ),
+    );
+
+    //get the tripDirectionDetails = distance travelled
+    // var currentDriverPositionLatLng = LatLng(
+    //   onlineDriverCurrentPosition!.latitude,
+    //   onlineDriverCurrentPosition!.longitude,
+    // );
+
+    // var tripDirectionDetails = await AssistantMethods.obtainOriginToDestinationDirectionDetails(
+    //     currentDriverPositionLatLng,
+    //     widget.userRideRequestDetails!.originLatLng!
+    // );
+
+    //fare amount
+    // double totalFareAmount = AssistantMethods.calculateFareAmountFromOriginToDestination(tripDirectionDetails!);
+
+    // FirebaseDatabase.instance.ref().child("Ride_Request")
+    //     .child(widget.userRideRequestDetails!.rideRequestId!)
+    //     .child("fareAmount")
+    //     .set(totalFareAmount.toString());
+
+    FirebaseDatabase.instance
+        .ref()
+        .child("Ride_Request")
+        .child(widget.userRideRequestDetails!.rideRequestId!)
+        .child("status")
+        .set("ended");
+
+    streamSubscriptionDriverLivePosition!.cancel();
+
+    Navigator.pop(context);
   }
 
   saveAssignedDriverDetailsToUserRideRequest() {
@@ -303,4 +401,43 @@ class _NewTripScreenState extends State<NewTripScreen> {
       });
     });
   }
+  // updateDurationTimeAtRealTime() async
+  // {
+  //   if(isRequestDirectionDetails == false)
+  //   {
+  //     isRequestDirectionDetails = true;
+
+  //     if(onlineDriverCurrentPosition == null)
+  //     {
+  //       return;
+  //     }
+
+  //     var originLatLng = LatLng(
+  //       onlineDriverCurrentPosition!.latitude,
+  //       onlineDriverCurrentPosition!.longitude,
+  //     ); //Driver current Location
+
+  //     var destinationLatLng;
+
+  //     if(rideRequestStatus == "accepted")
+  //     {
+  //       destinationLatLng = widget.userRideRequestDetails!.originLatLng; //user PickUp Location
+  //     }
+  //     else //arrived
+  //     {
+  //       destinationLatLng = widget.userRideRequestDetails!.destinationLatLng; //user DropOff Location
+  //     }
+
+  //     var directionInformation = await AssistantMethods.obtainOriginToDestinationDirectionDetails(originLatLng, destinationLatLng);
+
+  //     if(directionInformation != null)
+  //     {
+  //       setState(() {
+  //         durationFromOriginToDestination = directionInformation.duration_text!;
+  //       });
+  //     }
+
+  //     isRequestDirectionDetails = false;
+  //   }
+  // }
 }

@@ -1,5 +1,6 @@
 import 'package:driveridee/Models/address.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -84,7 +85,8 @@ class AssistantMethods {
       DirectDetails directDetails = DirectDetails();
 
       directDetails.distance =
-          (requestResponse["features"][0]["properties"]["distance"]/1000).truncate();
+          (requestResponse["features"][0]["properties"]["distance"] / 1000)
+              .truncate();
       print("####distance####");
 
       directDetails.time = requestResponse["features"][0]["properties"]["time"];
@@ -96,11 +98,11 @@ class AssistantMethods {
   }
 
   static int calcualateFares(DirectDetails directDetails) {
-    double Fare = directDetails.distance! *18 +100;
+    double Fare = directDetails.distance! * 18 + 100;
     return Fare.truncate();
   }
-  static void readCurrentOnlineUserInfo() async
-  {
+
+  static void readCurrentOnlineUserInfo() async {
     currentFirebaseUser = fAuth.currentUser;
 
     DatabaseReference userRef = FirebaseDatabase.instance
@@ -108,13 +110,21 @@ class AssistantMethods {
         .child("users")
         .child(currentFirebaseUser!.uid);
 
-    userRef.once().then((snap)
-    {
-      if(snap.snapshot.value != null)
-      {
+    userRef.once().then((snap) {
+      if (snap.snapshot.value != null) {
         userModelCurrentInfo = UserModel.fromSnapshot(snap.snapshot);
       }
     });
   }
-  
+
+  static pauseLiveLocationUpdates() {
+    streamSubscriptionPosition!.pause();
+    Geofire.removeLocation(currentFirebaseUser!.uid);
+  }
+
+  static resumeLiveLocationUpdates() {
+    streamSubscriptionPosition!.resume();
+    Geofire.setLocation(currentFirebaseUser!.uid,
+        driverCurrentPosition!.latitude, driverCurrentPosition!.longitude);
+  }
 }

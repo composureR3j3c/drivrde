@@ -210,7 +210,7 @@ class _NotificationDialogBoxState extends State<NotificationDialogBox> {
             .child("newRide")
             .set("accepted");
 
-        // AssistantMethods.pauseLiveLocationUpdates();
+        AssistantMethods.pauseLiveLocationUpdates();
 
         //trip started now - send driver to new tripScreen
         Navigator.push(
