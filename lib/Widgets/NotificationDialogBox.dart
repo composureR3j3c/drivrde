@@ -1,7 +1,11 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:driveridee/AllScreens/NewTripScreen.dart';
 import 'package:driveridee/Globals/Global.dart';
+import 'package:driveridee/Helpers/assistantMethods.dart';
 import 'package:driveridee/Models/UserRideRequestInfo.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class NotificationDialogBox extends StatefulWidget {
   UserRideRequestInformation? userRideRequestDetails;
@@ -157,11 +161,12 @@ class _NotificationDialogBoxState extends State<NotificationDialogBox> {
                       primary: Colors.green,
                     ),
                     onPressed: () {
-                      // audioPlayer.pause();
-                      // audioPlayer.stop();
-                      // audioPlayer = AssetsAudioPlayer();
+                      audioPlayer.pause();
+                      audioPlayer.stop();
+                      audioPlayer = AssetsAudioPlayer();
 
-                      //accept the rideRequest
+                      acceptRideRequest(context);
+                      // accept the rideRequest
 
                       Navigator.pop(context);
                     },
@@ -179,5 +184,46 @@ class _NotificationDialogBoxState extends State<NotificationDialogBox> {
         ),
       ),
     );
+  }
+
+  acceptRideRequest(BuildContext context) {
+    String getRideRequestId = "";
+    FirebaseDatabase.instance
+        .ref()
+        .child("drivers")
+        .child(currentFirebaseUser!.uid)
+        .child("newRide")
+        .once()
+        .then((snap) {
+      if (snap.snapshot.value != null) {
+        getRideRequestId = snap.snapshot.value.toString();
+      } else {
+        Fluttertoast.showToast(msg: "This ride request do not exists.");
+      }
+
+      // if (getRideRequestId == widget.userRideRequestDetails!.rideRequestId)
+      {
+        FirebaseDatabase.instance
+            .ref()
+            .child("drivers")
+            .child(currentFirebaseUser!.uid)
+            .child("newRide")
+            .set("accepted");
+
+        // AssistantMethods.pauseLiveLocationUpdates();
+
+        //trip started now - send driver to new tripScreen
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (c) => NewTripScreen(
+                      userRideRequestDetails: widget.userRideRequestDetails,
+                    )));
+      }
+      // else
+      {
+        // Fluttertoast.showToast(msg: "This Ride Request do not exists.");
+      }
+    });
   }
 }

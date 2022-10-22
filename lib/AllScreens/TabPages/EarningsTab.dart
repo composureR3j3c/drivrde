@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 
-class EarnigsTab extends StatelessWidget {
-  const EarnigsTab({Key? key}) : super(key: key);
+class EarningsTab extends StatefulWidget {
+  const EarningsTab({Key? key}) : super(key: key);
 
   @override
+  _EarningsTabState createState() => _EarningsTabState();
+}
+
+class _EarningsTabState extends State<EarningsTab> {
+  @override
   Widget build(BuildContext context) {
-    return Container();
+    return Center(
+      child: Text("Earnings"),
+    );
   }
 }

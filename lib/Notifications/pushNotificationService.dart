@@ -44,6 +44,7 @@ class PushNotifServices {
 
   readUserRideRequestInformation(
       String userRideRequestId, BuildContext context) {
+    print("#####here######");
     FirebaseDatabase.instance
         .ref()
         .child("Ride_Request")
@@ -77,6 +78,8 @@ class PushNotifServices {
         userRideRequestDetails.originLatLng = LatLng(originLat, originLng);
         userRideRequestDetails.originAddress = originAddress;
 
+        String? rideRequestId = snapData.snapshot.key;
+
         userRideRequestDetails.destinationLatLng =
             LatLng(destinationLat, destinationLng);
         userRideRequestDetails.destinationAddress = destinationAddress;
@@ -84,11 +87,14 @@ class PushNotifServices {
         userRideRequestDetails.userName = userName;
         userRideRequestDetails.userPhone = userPhone;
 
+        userRideRequestDetails.rideRequestId = rideRequestId;
+
+        userRideRequestDetails.rideRequestId = rideRequestId;
         showDialog(
-            context: context,
-            builder: (BuildContext context) => NotificationDialogBox(
-                userRideRequestDetails: userRideRequestDetails,
-            ),
+          context: context,
+          builder: (BuildContext context) => NotificationDialogBox(
+            userRideRequestDetails: userRideRequestDetails,
+          ),
         );
       } else {
         Fluttertoast.showToast(msg: "This Ride Request Id do not exists.");
@@ -110,43 +116,5 @@ class PushNotifServices {
 
     messaging.subscribeToTopic("allDrivers");
     messaging.subscribeToTopic("allUsers");
-  }
-
-  // Future checkPermission() async {
-  //   NotificationSettings settings = await messaging.requestPermission(
-  //     alert: true,
-  //     announcement: false,
-  //     badge: true,
-  //     carPlay: false,
-  //     criticalAlert: false,
-  //     provisional: false,
-  //     sound: true,
-  //   );
-
-  //   if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-  //     String? token = await messaging.getToken();
-  //     print("#token");
-  //     print(token);
-  //     print("#token");
-
-  //     DatabaseReference driversRef =
-  //         FirebaseDatabase.instance.ref().child("drivers");
-  //     driversRef.child(currentFirebaseUser!.uid).child("token").set(token);
-
-  //     await messaging.subscribeToTopic("allusers");
-  //     await messaging.subscribeToTopic("alldrivers");
-  //     ForgroundListener();
-  //   } else {}
-  // }
-
-  void ForgroundListener() {
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
-
-      if (message.notification != null) {
-        print('Message also contained a notification: ${message.notification}');
-      }
-    });
   }
 }

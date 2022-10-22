@@ -21,7 +21,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   late TabController tabController;
   var selectedIndex = 0;
-  
+
   @override
   void initState() {
     // TODO: implement initState
@@ -37,7 +37,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         controller: tabController,
         children: [
           HomeTab(),
-          EarnigsTab(),
+          EarningsTab(),
           RatingsTab(),
           ProfileTab(),
         ],
@@ -65,22 +65,3 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     tabController.index = selectedIndex;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 

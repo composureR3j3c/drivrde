@@ -29,8 +29,6 @@ class _HomeTabState extends State<HomeTab> {
 
   double bottomPadding = 0;
 
-  late Position currentPosition;
-
   late LocationPermission permission;
 
   late String driverStatusText = "Offline Now - Go Online";
@@ -57,7 +55,7 @@ class _HomeTabState extends State<HomeTab> {
       } else {
         Position position = await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.high);
-        currentPosition = position;
+        driverCurrentPosition = position;
 
         LatLng latLngPosition = LatLng(position.latitude, position.longitude);
 
@@ -174,6 +172,32 @@ class _HomeTabState extends State<HomeTab> {
 
   readCurrentDriverInformation() async {
     currentFirebaseUser = fAuth.currentUser;
+
+    await FirebaseDatabase.instance
+        .ref()
+        .child("drivers")
+        .child(currentFirebaseUser!.uid)
+        .once()
+        .then((DatabaseEvent snap) {
+      if (snap.snapshot.value != null) {
+        onlineDriverData.id = (snap.snapshot.value as Map)["id"];
+        onlineDriverData.name = (snap.snapshot.value as Map)["name"];
+        onlineDriverData.phone = (snap.snapshot.value as Map)["phone"];
+        onlineDriverData.email = (snap.snapshot.value as Map)["email"];
+        onlineDriverData.car_color =
+            (snap.snapshot.value as Map)["Car_details"]["car_color"];
+        onlineDriverData.car_model =
+            (snap.snapshot.value as Map)["Car_details"]["car_model"];
+        onlineDriverData.car_number =
+            (snap.snapshot.value as Map)["Car_details"]["car_number"];
+
+        print("Car Details :: ");
+        print(onlineDriverData.car_color);
+        print(onlineDriverData.car_model);
+        print(onlineDriverData.car_number);
+      }
+    });
+
     PushNotifServices pushNotificationSystem = PushNotifServices();
     pushNotificationSystem.initializeFCM(context);
     pushNotificationSystem.generateAndGetToken();
@@ -188,12 +212,12 @@ class _HomeTabState extends State<HomeTab> {
 
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-    currentPosition = position;
+    driverCurrentPosition = position;
 
     Geofire.initialize("availableDrivers");
-    Geofire.setLocation(currentFirebaseUser!.uid, currentPosition.latitude,
-        currentPosition.longitude);
-
+    Geofire.setLocation(currentFirebaseUser!.uid,
+        driverCurrentPosition!.latitude, driverCurrentPosition!.longitude);
+    rideReference!.set("idle");
     rideReference!.onValue.listen((event) {});
   }
 
@@ -209,7 +233,7 @@ class _HomeTabState extends State<HomeTab> {
   void getLiveLocation() {
     homePageStreamSubscription =
         Geolocator.getPositionStream().listen((Position position) {
-      currentPosition = position;
+      driverCurrentPosition = position;
       if (isDriverAvailable == true) {
         Geofire.setLocation(
             currentFirebaseUser!.uid, position.latitude, position.longitude);

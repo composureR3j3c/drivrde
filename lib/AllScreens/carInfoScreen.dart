@@ -75,7 +75,7 @@ class _CarInfoState extends State<CarInfo> {
               height: 22.0,
             ),
             Image.asset(
-              "images/logo.png",
+              "images/logo1.png",
               width: 390.0,
               height: 250.0,
             ),
